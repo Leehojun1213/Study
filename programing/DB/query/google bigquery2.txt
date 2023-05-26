@@ -1,0 +1,99 @@
+select product_category, floor(avg(cost)) as avg_cost from sample.products
+group by product_category
+order by avg_cost desc
+
+select prefecture,count(prefecture) as users from `sample.customers`
+where is_premium = true
+group by prefecture
+order by users desc
+limit 3
+;
+
+select count(prefecture) as users from sample.costomers
+where prefecture != '東京'
+
+select count(distinct user_id) as users from sample.sales
+
+SELECT c.name, SUM(s.revenue) AS sum_rev
+FROM `sample.sales` AS s
+JOIN `sample.customers` AS c ON s.user_id = c.user_id
+GROUP BY c.name
+ORDER BY sum_rev DESC
+LIMIT 3;
+
+SELECT
+  p.product_category,
+  SUM(s.revenue) AS sum_revenue
+FROM
+  `sample.sales` AS s
+JOIN
+  `sample.products` AS p
+ON
+  s.product_id = p.product_id
+GROUP BY
+  p.product_category
+ORDER BY
+  sum_revenue DESC;
+
+
+SELECT
+  CASE WHEN c.gender = 1 THEN 'Male'
+       WHEN c.gender = 2 THEN 'Female'
+       ELSE 'Unknown'
+  END AS gender,
+  p.product_category AS product_category,
+  SUM(s.revenue) AS sum_revenue
+FROM
+  `sample.sales` s
+JOIN
+  `sample.products` p ON s.product_id = p.product_id
+JOIN
+  `sample.customers` c ON s.user_id = c.user_id
+GROUP BY
+  gender, product_category
+ORDER BY
+  sum_revenue DESC;
+
+with master as (
+  select user_id, quantity, gender
+  from sample.sales
+  join sample.customers
+  using(user_id)
+)
+
+select sum (quantity) as sum_qty
+from master
+where gender = 2
+;
+
+with master as(
+select product_id, sum(quantity) as sum_qty,
+sum(quantity) / (select sum(quantity) from `sample.sales`) *100  AS sales_share
+from `sample.sales`
+group by product_id
+)
+
+select product_id, sum_qty, sales_share
+from master
+order by sales_share desc
+
+;
+
+with mama as(
+select product_id, sum(quantity) as sum_qty from sample.sales
+where date_time between '2019-07-01' and '2019-09-30'
+group by product_id
+having sum(quantity) >= 10
+),
+papa as(
+select product_id, sum(quantity) as sum_qty from sample.sales
+where date_time between '2019-10-01' and '2019-12-31'
+group by product_id
+having sum(quantity) < 10
+)
+
+select product_id from papa
+join mama
+using(product_id)
+limit 3
+;

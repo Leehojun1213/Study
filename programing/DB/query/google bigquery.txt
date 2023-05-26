@@ -1,0 +1,41 @@
+select name, birthday, register_date from `sample.customers`
+where format_datetime("%m%d", birthday) = format_datetime("%m%d", register_date)
+
+select name, birthday, date_diff("2023-03-01", birthday, year) AS age
+from sample.customers
+where(date_diff("2023-03-01", birthday, year) >= 60)
+;
+
+select * from `sample.customers`
+where prefecture not in ("東京", "千葉", "埼玉", "神奈川")
+and is_premium is true
+order by birthday desc 
+limit 3;
+
+select * from `sample.customers`
+where (is_premium is true
+or birthday >= '1970-01-01' and birthday < '1980-01-01')
+and gender = 2
+and name like ("%__美")
+order by birthday
+limit 3;
+
+select * from `sample.customers`
+where birthday is not null 
+and is_premium is true
+order by birthday desc, register_date
+limit 3;
+
+select order_id, quantity,
+quantity + 1 as new_quantity,
+revenue, 
+revenue / quantity + revenue as new_revenue
+from sample.sales
+order by revenue desc
+limit 3;
+
+select * except(revenue) , 
+  revenue * 1.1 as revenue_whth_tax
+   from sample.sales
+   order by order_id
+   limit 3;
